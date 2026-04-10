@@ -1,6 +1,7 @@
 # IndexAI Protocol
 
 AI-powered on-chain asset management on HashKey Chain.
+AI-generated portfolio allocations are executed and stored on-chain via smart contracts.
 
 ## What it does
 IndexAI automatically generates and executes optimized DeFi portfolios using AI.
