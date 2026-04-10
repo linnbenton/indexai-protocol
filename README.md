@@ -2,19 +2,23 @@
 
 AI-powered on-chain asset management on HashKey Chain.
 
-## Overview
-IndexAI generates and executes optimized DeFi portfolios automatically using AI.
+## What it does
+IndexAI automatically generates and executes optimized DeFi portfolios using AI.
 
-## Features
-- AI portfolio generation
-- On-chain execution
-- Smart contract-based allocation
-- Auto rebalancing (WIP)
+## How it works
+1. AI analyzes market data
+2. Generates portfolio allocation
+3. Smart contract executes trades
+4. Portfolio is rebalanced over time
 
-## Structure
-- /contracts → smart contracts
-- /frontend → user interface
-- /backend → AI / API logic
+## Architecture
+- Frontend → User interface
+- Backend → AI + API
+- Contracts → Execution layer
+
+## Contract
+Address: (isi nanti)
+TX: (isi nanti)
 
 ## Status
-Hackathon MVP
+Hackathon MVP (working transaction confirmed)
