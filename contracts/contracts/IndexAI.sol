@@ -2,16 +2,11 @@
 pragma solidity ^0.8.20;
 
 contract IndexAI {
-
-    struct Allocation {
-        address[] tokens;
-        uint256[] weights;
-        uint256 timestamp;
-    }
-
-    mapping(address => Allocation) public portfolios;
-
     event TradeExecuted(address user);
+
+    // 🔥 NEW: simpan portfolio user
+    mapping(address => address[]) public userTokens;
+    mapping(address => uint256[]) public userWeights;
 
     function executeTrade(
         address[] memory tokens,
@@ -19,16 +14,19 @@ contract IndexAI {
     ) public {
         require(tokens.length == weights.length, "Mismatch");
 
-        portfolios[msg.sender] = Allocation({
-            tokens: tokens,
-            weights: weights,
-            timestamp: block.timestamp
-        });
+        // 🔥 SIMPAN DATA
+        userTokens[msg.sender] = tokens;
+        userWeights[msg.sender] = weights;
 
         emit TradeExecuted(msg.sender);
     }
 
-    function getMyPortfolio() public view returns (Allocation memory) {
-        return portfolios[msg.sender];
+    // 🔥 NEW: ambil portfolio user
+    function getPortfolio(address user)
+        public
+        view
+        returns (address[] memory, uint256[] memory)
+    {
+        return (userTokens[user], userWeights[user]);
     }
 }

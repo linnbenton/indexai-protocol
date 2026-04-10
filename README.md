@@ -39,22 +39,13 @@ IndexAI removes this complexity by using AI to generate portfolio allocations an
 
 ---
 
-## HashKey Deployment
+## HashKey Deployment (Final)
 
-- **Network:** HashKey Chain Testnet  
-- **Contract Address:**  
-  0x0E801D84Fa97b50751Dbf25036d067dCf18858bF  
+Network: HashKey Chain Testnet  
+Contract: 0x9d4454B023096f34B160D6B654540c56A1F81688  
+TX: https://testnet-explorer.hsk.xyz/tx/0x99245eaacc9692711f3a0d0ce1338561bfe08e94b3fc4fcc7165b12f6a1b3374  
 
----
-
-## Proof of Execution (HashKey)
-
-- **Transaction:**  
-  https://testnet-explorer.hsk.xyz/tx/0xd41537d9fb4a4dd5e897bb9d30dcb95290741604cd0d17daa6c9604446a08693
-
-- **Status:** Success ✅  
-
-All executions are verifiable on-chain.
+Portfolio allocations are stored and retrievable on-chain.
 
 ---
 
