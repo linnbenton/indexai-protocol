@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>IndexAI Demo</title>
+<style>
+  body {
+    background: #0B0B0F;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding-top: 80px;
+  }
+  button {
+    padding: 12px 24px;
+    margin: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #6C5CE7;
+    color: white;
+    cursor: pointer;
+  }
+  #box {
+    margin-top: 30px;
+    padding: 20px;
+    border: 1px solid #333;
+    display: inline-block;
+  }
+</style>
+</head>
+<body>
+
+<h1>IndexAI Live Demo</h1>
+<p>AI-powered on-chain portfolio execution</p>
+
+<!-- TAMBAHAN DI SINI -->
+<button onclick="connectWallet()">Connect Wallet</button>
+<p id="wallet">Not connected</p>
+
+<!-- TOMBOL LAMA -->
+<button onclick="generate()">Generate Portfolio</button>
+
+<button onclick="saveStrategy()">Save Strategy</button>
+
+<button onclick="execute()">Execute On-chain</button>
+
+<div id="box">Waiting for action...</div>
+
+<script>
+function generate() {
+  document.getElementById("box").innerHTML =
+  "AI Portfolio:<br><br>" +
+  "40% AI Tokens<br>" +
+  "30% Layer 2<br>" +
+  "20% Stablecoins<br>" +
+  "10% Experimental";
+}
+
+function saveStrategy() {
+  document.getElementById("box").innerHTML =
+    "Strategy saved successfully.<br><br>" +
+    "Ready for execution.";
+}
+
+function connectWallet() {
+  const wallet = document.getElementById("wallet");
+  wallet.innerHTML = "Connected: 0x7A3F...91D2";
+}
+
+function execute() {
+  const walletText = document.getElementById("wallet").innerText;
+
+  if (walletText === "Not connected") {
+    alert("Please connect wallet first");
+    return;
+  }
+
+  const box = document.getElementById("box");
+
+  box.innerHTML = "Connecting wallet...";
+
+  setTimeout(() => {
+    box.innerHTML = "Sending transaction...";
+  }, 1000);
+
+  setTimeout(() => {
+    box.innerHTML =
+      "Transaction sent!<br><br>" +
+      "Tx Hash:<br>0xA9F3B2C7D8E91F...8C21<br><br>" +
+      "Status: Success<br>" +
+      "Executed via smart contract on HashKey Chain";
+  }, 2500);
+}
+</script>
+
+</body>
+</html>
