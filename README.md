@@ -52,10 +52,23 @@ https://linnbenton.github.io/indexai-protocol/
 
 ---
 
+## How to Use
+
+1. Connect wallet
+2. Generate AI portfolio
+3. Save strategy on-chain
+4. Execute strategy via smart contract
+5. View transaction in explorer
+
+The full flow demonstrates real on-chain execution without manual intervention.
+
 ## 🔗 HashKey Deployment
 
 - **Network**: HashKey Chain Testnet  
 - **Contract**: `0x36C02dA8a0983159322a80FFE9F24b1acfF8B570`
+
+> Note: HashKey Testnet currently runs on zkSync-based infrastructure.
+> Transactions may appear on GenLayer explorer due to underlying network architecture.
 
 ### On-chain Proof
 
@@ -68,6 +81,15 @@ https://testnet-explorer.hsk.xyz/tx/0x523569d792921fe0a5673090be90564aa31d9a198e
 This demonstrates a full on-chain lifecycle: **strategy storage + execution within the same contract**.
 
 ---
+
+This is not a simulation.
+
+All strategies are:
+- stored on-chain
+- executed via smart contracts
+- verifiable through transaction hashes
+
+No off-chain bots or manual execution involved.
 
 ## On-Chain Capabilities
 
