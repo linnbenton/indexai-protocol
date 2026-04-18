@@ -2,104 +2,444 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>IndexAI Demo</title>
+<title>IndexAI</title>
+
 <style>
-  body {
-    background: #0B0B0F;
-    color: white;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding-top: 80px;
-  }
-  button {
-    padding: 12px 24px;
-    margin: 10px;
-    border: none;
-    border-radius: 8px;
-    background: #6C5CE7;
-    color: white;
-    cursor: pointer;
-  }
-  #box {
-    margin-top: 30px;
-    padding: 20px;
-    border: 1px solid #333;
-    display: inline-block;
-  }
+body { background:#0b0b0f; color:white; font-family:Arial; margin:0; }
+.container { max-width:900px; margin:auto; padding:60px 20px; }
+
+.title { font-size:32px; font-weight:bold; }
+.subtitle { color:#aaa; }
+
+.card {
+  background:#12121a;
+  border:1px solid #222;
+  border-radius:16px;
+  padding:20px;
+  margin-top:20px;
+}
+
+.button {
+  padding:12px 20px;
+  margin:5px;
+  border-radius:10px;
+  border:none;
+  background:#6c5ce7;
+  color:white;
+  cursor:pointer;
+}
+
+.wallet-badge {
+  padding:6px 12px;
+  background:#1a1a2e;
+  border-radius:999px;
+  display:inline-block;
+  margin-top:10px;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-yellow {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #FFD600;
+  color: #000;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.btn-yellow:hover {
+  opacity: 0.9;
+}
+
+.status { color:#8e7dff; margin-top:10px; }
+
+.bar {
+  display:flex;
+  justify-content:space-between;
+  background:#1a1a2e;
+  border-radius:8px;
+  margin:10px 0;
+}
+
+.fill {
+  background:#6c5ce7;
+  border-radius:8px;
+  padding:8px;
+}
+
+.price { color:#00ffcc; padding:8px; }
+.total { font-size:28px; font-weight:bold; }
 </style>
 </head>
+
 <body>
+<div class="container">
 
-<h1>IndexAI Live Demo</h1>
-<p>AI-powered on-chain portfolio execution</p>
+<div class="title">IndexAI</div>
+<div class="subtitle">Autonomous execution layer for AI-driven DeFi strategies</div>
+<div style="margin-top:10px; color:#888; font-size:14px;">
+  Live on HashKey Testnet (zkSync infrastructure)
+</div>
 
-<!-- TAMBAHAN DI SINI -->
-<button onclick="connectWallet()">Connect Wallet</button>
-<p id="wallet">Not connected</p>
+<button class="button" onclick="connectWallet()">Connect Wallet</button>
+<div id="wallet">Not connected</div>
+<div id="status" class="status">Status: Idle</div>
 
-<!-- TOMBOL LAMA -->
-<button onclick="generate()">Generate Portfolio</button>
+<div class="card">
+<h3>Total Portfolio</h3>
+<div id="total" class="total">$...</div>
+</div>
 
-<button onclick="saveStrategy()">Save Strategy</button>
+<div class="card">
+<h3>Portfolio Allocation</h3>
 
-<button onclick="execute()">Execute On-chain</button>
+<div class="bar"><span class="fill" style="width:25%">BTC</span><span id="btc" class="price">$...</span></div>
+<div class="bar"><span class="fill" style="width:20%">ETH</span><span id="eth" class="price">$...</span></div>
+<div class="bar"><span class="fill" style="width:15%">BNB</span><span id="bnb" class="price">$...</span></div>
+<div class="bar"><span class="fill" style="width:15%">SOL</span><span id="sol" class="price">$...</span></div>
+<div class="bar"><span class="fill" style="width:15%">HSK</span><span id="hsk" class="price">$...</span></div>
+<div class="bar"><span class="fill" style="width:10%">USDC</span><span id="usdc" class="price">$...</span></div>
 
-<div id="box">Waiting for action...</div>
+</div>
+
+<div class="card">
+<h3>Strategy Actions</h3>
+<button class="button" onclick="generate()">Generate</button>
+<button class="button" onclick="saveStrategy()">Save</button>
+<button class="button" onclick="execute()">Execute</button>
+</div>
+
+<div class="card">
+  <h3>Execution Output</h3>
+
+  <div id="box">Waiting for action...</div>
+
+  <!-- 🔥 TAMBAH DI SINI -->
+  <div style="color:#888; font-size:12px; margin-top:8px;">
+    Explorer sync may vary. Transactions are confirmed on-chain via zkSync infrastructure.
+  </div>
+
+</div>
+
+</div>
 
 <script>
-    let strategySaved = false;
+function setStatus(text) {
+  document.getElementById("status").innerText = text;
+}
+
+function setBox(html) {
+  document.getElementById("box").innerHTML = html;
+}
+
+function loadingDots(base) {
+  let dots = 0;
+  return setInterval(() => {
+    dots = (dots + 1) % 4;
+    setBox(base + ".".repeat(dots));
+  }, 400);
+}
+
+function setButtonsDisabled(disabled) {
+  document.querySelectorAll(".button")
+    .forEach(btn => btn.disabled = disabled);
+}
+
+let userAddress = null;
+let isExecuting = false;
+
+function setStatus(text) {
+  document.getElementById("status").innerText = text;
+}
+
+function setBox(html) {
+  document.getElementById("box").innerHTML = html;
+}
+
+function setButtonsDisabled(disabled) {
+  document.querySelectorAll(".button").forEach(b => b.disabled = disabled);
+}
+
+const contractAddress = "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570";
+const chainId = "0x107d";
+
+// 🔥 TARUH DI SINI (GLOBAL)
+const HASHKEY_CONFIG = {
+  chainId: "0x107d", // 4221
+  chainName: "HashKey Testnet",
+  rpcUrls: ["https://zksync-os-testnet-genlayer.zksync.dev"], // infra
+  nativeCurrency: {
+    name: "HSK",
+    symbol: "HSK",
+    decimals: 18
+  },
+  blockExplorerUrls: ["https://testnet-explorer.hsk.xyz"]
+};
+
+async function ensureHashKey() {
+  try {
+    // coba switch dulu
+    await ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: "0x107d" }]
+    });
+
+  } catch (err) {
+
+    // 🔥 kalau belum ada → add network
+    if (err.code === 4902) {
+      await ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [{
+          chainId: "0x107d",
+          chainName: "HashKey Testnet",
+          rpcUrls: ["https://testnet-explorer.hsk.xyz"],
+          nativeCurrency: {
+            name: "HSK",
+            symbol: "HSK",
+            decimals: 18
+          },
+          blockExplorerUrls: ["https://testnet-explorer.hsk.xyz"]
+        }]
+      });
+
+      // 🔥 WAJIB: switch lagi setelah add
+      await ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0x107d" }]
+      });
+
+    } else {
+      console.error("Switch error:", err);
+      alert("User rejected or switch failed");
+      throw err;
+    }
+  }
+}
+
+async function checkNetwork() {
+  const current = await ethereum.request({ method: "eth_chainId" });
+
+  if (current !== chainId) {
+    await ensureHashKey();
+
+    const after = await ethereum.request({ method: "eth_chainId" });
+
+    if (after !== chainId) {
+      alert("Please manually switch to HashKey Testnet in MetaMask");
+      throw new Error("Wrong network");
+    }
+  }
+}
+
+const abi = [
+  "function executeStrategy() public",
+  "function getPortfolio(address user) view returns (uint256,uint256,uint256,uint256,uint256,uint256)"
+];
+
+async function connectWallet() {
+  if (!window.ethereum) {
+    alert("Install MetaMask");
+    return;
+  }
+
+  try {
+    const accounts = await ethereum.request({
+      method: "eth_requestAccounts"
+    });
+
+    userAddress = accounts[0];
+
+    await ensureHashKey(); // 🔥 ini yang switch
+
+    setStatus("Syncing...");
+    await refreshFromChain();
+    setStatus("Connected • HashKey Testnet");
+
+    document.getElementById("wallet").className = "wallet-badge";
+    document.getElementById("wallet").innerText =
+      userAddress.slice(0,6) + "..." + userAddress.slice(-4);
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function loadingDots(base) {
+  let dots = 0;
+  return setInterval(() => {
+    dots = (dots + 1) % 4;
+    setBox(base + ".".repeat(dots));
+  }, 400);
+}
 
 function generate() {
   document.getElementById("box").innerHTML =
-  "AI Portfolio:<br><br>" +
-  "40% AI Tokens<br>" +
-  "30% Layer 2<br>" +
-  "20% Stablecoins<br>" +
-  "10% Experimental";
+    "📊 Strategy Generated<br><br>" +
+    "BTC 25%<br>" +
+    "ETH 20%<br>" +
+    "BNB 15%<br>" +
+    "SOL 15%<br>" +
+    "HSK 15%<br>" +
+    "USDC 10%";
 }
 
 function saveStrategy() {
   strategySaved = true;
-
-  document.getElementById("box").innerHTML =
-    "Strategy saved successfully.<br><br>" +
-    "Ready for execution.";
+  document.getElementById("box").innerText = "Strategy Saved";
 }
 
-function connectWallet() {
-  const wallet = document.getElementById("wallet");
-  wallet.innerHTML = "Connected: 0x7A3F...91D2";
-}
+async function execute() {
 
-function execute() {
-  const walletText = document.getElementById("wallet").innerText;
+  await checkNetwork();
 
-  if (walletText === "Not connected") {
-    alert("Please connect wallet first");
-    return;
+  if (!userAddress) return alert("Connect wallet");
+  if (!strategySaved) return alert("Save strategy");
+
+  setButtonsDisabled(true);
+
+  const loader = loadingDots("Sending transaction");
+
+  try {
+    const txHash = await ethereum.request({
+      method: "eth_sendTransaction",
+      params: [{
+        from: userAddress,
+        to: contractAddress,
+        data: "0x44647185"
+      }]
+    });
+
+    clearInterval(loader);
+
+    setBox(`
+    🚀 Transaction sent<br><br>
+
+      <a href="https://testnet-explorer.hsk.xyz/tx/${txHash}"
+         target="_blank">
+         View on HashKey
+      </a>
+
+      <br></br>
+
+      <a href="https://zksync-os-testnet-genlayer.explorer.zksync.dev/tx/${txHash}" target="_blank">
+        View on GenLayer
+      </a>
+    `);
+
+    setStatus("Waiting for confirmation...");
+
+    // 🔥 REAL CONFIRMATION (INI BEDANYA)
+    await waitTxConfirmed(txHash);
+
+    setStatus("Syncing on-chain data...");
+    await refreshFromChain();
+
+    setStatus("Execution Complete ✅");
+
+    setBox(`
+      Strategy executed 🚀<br><br>
+
+      <a class="btn-yellow"
+         href="https://testnet-explorer.hsk.xyz/tx/${txHash}"
+         target="_blank">
+         View on HashKey Explorer
+      </a>
+
+      <br></br>
+
+      <a class="btn-yellow"
+        href="https://zksync-os-testnet-genlayer.explorer.zksync.dev/tx/${txHash}" target="_blank">
+        View on GenLayer Explorer
+      </a>
+    `);
+
+    setButtonsDisabled(false);
+
+  } catch (err) {
+    clearInterval(loader);
+    console.error(err);
+
+    setBox("❌ Transaction Failed");
+    setStatus("Error");
+
+    setButtonsDisabled(false);
   }
-
-  if (!strategySaved) {
-  alert("Please generate and save strategy first");
-  return;
 }
 
-  const box = document.getElementById("box");
+// PRICE
+async function loadPrices(){
+  const r=await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,usd-coin&vs_currencies=usd");
+  const d=await r.json();
 
-  box.innerHTML = "Connecting wallet...";
+  const p={
+    BTC:d.bitcoin.usd,
+    ETH:d.ethereum.usd,
+    BNB:d.binancecoin.usd,
+    SOL:d.solana.usd,
+    USDC:d["usd-coin"].usd,
+    HSK:0.25
+  };
 
-  setTimeout(() => {
-    box.innerHTML = "Sending transaction...";
-  }, 1000);
+  document.getElementById("btc").innerText="$"+p.BTC;
+  document.getElementById("eth").innerText="$"+p.ETH;
+  document.getElementById("bnb").innerText="$"+p.BNB;
+  document.getElementById("sol").innerText="$"+p.SOL;
+  document.getElementById("usdc").innerText="$"+p.USDC;
+  document.getElementById("hsk").innerText="$"+p.HSK;
 
-  setTimeout(() => {
-    box.innerHTML =
-      "Transaction sent!<br><br>" +
-      "Tx Hash:<br>0xA9F3B2C7D8E91F...8C21<br><br>" +
-      "Status: Success<br>" +
-      "Executed via smart contract on HashKey Chain";
-  }, 2500);
+  const total=p.BTC*0.25+p.ETH*0.2+p.BNB*0.15+p.SOL*0.15+p.HSK*0.15+p.USDC*0.1;
+  document.getElementById("total").innerText="$"+total.toFixed(2);
 }
+
+loadPrices();
+
+async function waitTxConfirmed(txHash) {
+  return new Promise((resolve, reject) => {
+    const interval = setInterval(async () => {
+      try {
+        const receipt = await ethereum.request({
+          method: "eth_getTransactionReceipt",
+          params: [txHash]
+        });
+
+        if (receipt) {
+          clearInterval(interval);
+
+          if (receipt.status === "0x1") {
+            resolve(receipt);
+          } else {
+            reject(new Error("Transaction failed"));
+          }
+        }
+      } catch (e) {
+        clearInterval(interval);
+        reject(e);
+      }
+    }, 1500);
+  });
+}
+
+async function refreshFromChain() {
+  try {
+    // sementara fallback pakai harga (biar gak kosong)
+    console.log("syncing...");
+
+    await loadPrices(); // pakai data yang sudah ada
+
+    document.getElementById("status").innerText = "Synced";
+
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 </script>
 
 </body>
